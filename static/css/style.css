@@ -44,3 +44,28 @@
  .pt-5 {
      padding-top: 80px !important;
  }
+
+ #autocomplete.ui-autocomplete-loading {
+     background-image: url('../img/loading.gif');
+     background-position: right center;
+     background-repeat: no-repeat;
+     width: 80px;
+ }
+
+ body .ui-autocomplete {
+     /* font-family to all */
+     font-family: "Roboto", sans-serif !important;
+     /* left: 632.5px !important;
+     width: 400px !important; */
+ }
+
+ body .ui-autocomplete .ui-menu-item .ui-corner-all {
+     /* all <a> */
+     font-family: "Roboto", sans-serif !important;
+ }
+
+ .ui-menu-item-wrapper:hover {
+     color: #303030 !important;
+     background-color: red !important;
+     border: #fff 1px solid !important;
+ }

@@ -15,8 +15,23 @@
   <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,400,500,700&display=swap">
   <!-- Material Design Bootstrap -->
   <link href="https://cdnjs.cloudflare.com/ajax/libs/mdbootstrap/4.16.0/css/mdb.min.css" rel="stylesheet">
+  <link href="https://ajax.googleapis.com/ajax/libs/jqueryui/1.11.4/themes/start/jquery-ui.min.css" rel="stylesheet">
   <link rel="stylesheet" href="{{ url_for('static',filename='css/style.css') }}">
-  
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jqueryui/1.12.1/jquery-ui.min.js"></script>
+  <script>
+    $(document).ready(function () {
+        if ('{{message_type}}' != "Error") {
+          $('.alert-autocloseable-success').hide();
+          $('.alert-autocloseable-success').show();
+          $('.alert-autocloseable-success').delay(5000).fadeOut("slow");
+        } else {
+          $('.alert-autocloseable-danger').hide();
+          $('.alert-autocloseable-danger').show();
+          $('.alert-autocloseable-danger').delay(5000).fadeOut("slow");
+        }
+      });
+  </script>
 </head>
 <body>
 <!-- Main navigation -->
@@ -25,7 +40,7 @@
   <nav class="navbar navbar-expand-lg navbar-dark fixed-top scrolling-navbar">
     <div class="container">
       <a class="navbar-brand" href="/"><strong>Song AI</strong></a>
-      <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent-7"
+      <!-- <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent-7"
         aria-controls="navbarSupportedContent-7" aria-expanded="false" aria-label="Toggle navigation">
         <span class="navbar-toggler-icon"></span>
       </button>
@@ -41,7 +56,7 @@
             <input class="form-control mr-sm-2" type="text" placeholder="Search" aria-label="Search">
           </div>
         </form>
-      </div>
+      </div> -->
     </div>
   </nav>
   <!-- Navbar -->
@@ -61,11 +76,32 @@
               data-wow-delay="0.3s"><strong class="highlight">MUSIC ANALYZER</strong></h1>
             <hr class="hr-light my-4 wow fadeInDown" data-wow-delay="0.4s">
             <h5 class="text-uppercase mb-4 white-text wow fadeInDown" data-wow-delay="0.4s"><strong class="highlight">Search for any song title or artist</strong></h5>
-            <form class="form wow fadeInDown justify-content-center text-center" data-wow-delay="0.4s">
+            <h5 class="text-uppercase mb-4 white-text wow fadeInDown" data-wow-delay="0.4s"><strong class="highlight">
+              
+              {% block message %}
+              
+              {% if 'Success' in message_type %}
+              <div class="alert alert-success alert-custom alert-autocloseable-success">
+                {{message_content}}
+              </div>
+              {% elif 'Error' in message_type %}
+              <div class="alert alert-danger alert-custom alert-autocloseable-danger">
+                {{message_content}}
+              </div>
+              {% else %}
+
+              {% endif %}
+              
+              {% endblock %}
+
+
+            </strong></h5>
+            <form class="form wow fadeInDown justify-content-center text-center" data-wow-delay="0.4s" name="searchSong" method="POST" action="/results">
                 <div class="md-form my-0 white-text">
-                  <input class="form-control mr-sm-2 text-center" type="text" placeholder="Search..." aria-label="Search">
+                  <input class="form-control mr-sm-2 text-center white-text" type="text" placeholder="Search..." aria-label="Search" id="autocomplete" name="q">
+                  <input type="hidden" name="song_url" id="songUrl" value="">
                 </div>
-              <button type="submit" class="btn btn-outline-white wow fadeInDown" data-wow-delay="0.4s">Go</button>
+                  <button type="submit" class="btn btn-outline-white wow fadeInDown" data-wow-delay="0.4s" id="search">Go</button>
             </form>
           </div>
           
@@ -83,11 +119,12 @@
 
 
     <!-- Bootstrap core JavaScript -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
+    
+    
     <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js"
-      integrity="sha384-UO2eT0CpHqdSJQ6hJty5KVphtPhzWj9WO1clHTMGa3JDZwrnQq4sF86dIHNDz0W1" crossorigin="anonymous"></script>
+    integrity="sha384-UO2eT0CpHqdSJQ6hJty5KVphtPhzWj9WO1clHTMGa3JDZwrnQq4sF86dIHNDz0W1" crossorigin="anonymous"></script>
     <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js"
-      integrity="sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM" crossorigin="anonymous"></script>
+    integrity="sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM" crossorigin="anonymous"></script>
     <!-- MDB core JavaScript -->
     <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mdbootstrap/4.16.0/js/mdb.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/wow/1.1.2/wow.min.js">
@@ -96,7 +133,9 @@
         </script>
     <script>
       new WOW().init();
-    </script>
+      </script>
+      <script type="text/javascript" src="{{ url_for('static',filename='js/custom.js') }}"></script>
+    
   </body>
 
 </html>
