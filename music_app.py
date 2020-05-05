@@ -20,6 +20,11 @@ Base = declarative_base()
 engine = create_engine("sqlite:///static/data/musicdb.sqlite")
 conn = engine.connect()
 
+agent = 'Mozilla/5.0 (Windows NT 6.0; WOW64; rv:24.0) \
+        Gecko/20100101 Firefox/24.0'
+headers = {'User-Agent': agent}
+base = "https://www.azlyrics.com/"
+
 # Base = automap_base()
 # Base.prepare(engine, reflect=True)
 # print(Base.classes.keys())
@@ -58,9 +63,9 @@ def results():
             song_title = request.form["q"]
             lyrics_url = lyrics_url_form
             print(lyrics_url_form, song_title)
-            response = requests.get(lyrics_url)
+            response = requests.get(lyrics_url,headers=headers)
             print(response)
-            soup = BeautifulSoup(response.text, 'html.parser')
+            soup = BeautifulSoup(response.content, 'html.parser')
             lyrics = soup.find('div', class_=None).text
             # lyrics = lyrics.replace('\n', ' ').replace('\r', ' ')
             return render_template("base.html", pg_title=song_title, page_content=lyrics)
