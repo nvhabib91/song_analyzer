@@ -52,12 +52,14 @@ class Songs(Base):
 def results():
     try:
         lyrics = ""
-        # print(request.values)
+        print(request.values)
         if request.method == "POST":
             lyrics_url_form = request.form["song_url"]
             song_title = request.form["q"]
             lyrics_url = lyrics_url_form
+            print(lyrics_url_form, song_title)
             response = requests.get(lyrics_url)
+            print(response)
             soup = BeautifulSoup(response.text, 'html.parser')
             lyrics = soup.find('div', class_=None).text
             # lyrics = lyrics.replace('\n', ' ').replace('\r', ' ')
