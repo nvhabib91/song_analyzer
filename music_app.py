@@ -18,7 +18,9 @@ from nltk.corpus import stopwords
 from operator import itemgetter
 import pandas as pd
 import matplotlib.pyplot as plt
-
+import imageio
+from wordcloud import WordCloud
+from PIL import Image
 
 app = Flask(__name__)
 
@@ -26,21 +28,16 @@ GENIUS_API_KEY = 'iPRpGvyPEPwHqexfQo75LsL0i2pPQxhkw-P5WStYbdvmUq-PQyf7ppCnT92Z-Z
 genius_base_url = 'https://api.genius.com'
 headers = {'Authorization': 'Bearer ' + GENIUS_API_KEY}
 
-nltk.download('stopwords')
+# nltk.download('stopwords')
 stops = stopwords.words('english')
 
 
-class Song:
-    def __init__(self, id, title, artist, url, album, year, image, lyrics ):
-        self.id = id
-        self.title = title
-        self.artist = artist
-        self.url = url
-        self.album = album
-        self.year = year
-        self.image = image
-        self.lyrics = lyrics
 
+def build_cloud(lyrics_input):
+    mask_image = imageio.imread('static\img\mask_circle.png')
+    wordcloud = WordCloud(width=500, height=500, colormap='prism', mask=mask_image, background_color=None, mode="RGBA")
+    wordcloud = wordcloud.generate(lyrics_input)
+    wordcloud = wordcloud.to_file('static\img\cloud.png')
 
 def build_wordcloud(lyrics_input):
     wordcloud_dict = {}
@@ -81,10 +78,6 @@ def get_song_details(song_id):
     return song_dict
 
 
-
-    
-
-
 @app.route("/results", methods=["GET", "POST"])
 def results():
     try:
@@ -93,6 +86,7 @@ def results():
             song_data_dict = get_song_details(request.form["song_id"])
             bar_data = build_wordcloud(song_data_dict["lyrics"])
             # print(bar_data)
+            build_cloud(song_data_dict["lyrics"])
             return render_template("base.html", song_data=song_data_dict, bar_data=bar_data)
     except:
         print("Unexpected error:", sys.exc_info()[0])
