@@ -1,6 +1,6 @@
 from wordcloud import WordCloud
 import imageio
-import sys
+import sys, os
 import numpy as np
 import requests
 import json
@@ -22,7 +22,10 @@ import imageio
 from wordcloud import WordCloud
 from PIL import Image
 
+
 app = Flask(__name__)
+APP_ROOT = os.path.dirname(os.path.abspath(__file__))
+APP_STATIC_IMG = os.path.join(APP_ROOT, 'static','img')
 
 GENIUS_API_KEY = 'iPRpGvyPEPwHqexfQo75LsL0i2pPQxhkw-P5WStYbdvmUq-PQyf7ppCnT92Z-ZQc'
 genius_base_url = 'https://api.genius.com'
@@ -34,10 +37,11 @@ stops = stopwords.words('english')
 
 
 def build_cloud(lyrics_input):
-    mask_image = imageio.imread('static\img\mask_circle.png')
-    wordcloud = WordCloud(width=500, height=500, colormap='prism', mask=mask_image, background_color=None, mode="RGBA")
+    mask_image = imageio.imread(os.path.join(APP_STATIC_IMG, 'mask_circle.png'))
+    wordcloud = WordCloud(width=500, height=500, colormap='tab20', mask=mask_image, background_color=None, mode="RGBA")
     wordcloud = wordcloud.generate(lyrics_input)
-    wordcloud = wordcloud.to_file('static\img\cloud.png')
+    filepath = os.path.join(APP_STATIC_IMG, 'cloud.png')
+    wordcloud = wordcloud.to_file(filepath)
 
 def build_wordcloud(lyrics_input):
     wordcloud_dict = {}
