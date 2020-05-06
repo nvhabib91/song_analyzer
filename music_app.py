@@ -21,6 +21,9 @@ import matplotlib.pyplot as plt
 import imageio
 from wordcloud import WordCloud
 from PIL import Image
+import re, datetime
+import shutil
+
 
 
 app = Flask(__name__)
@@ -40,8 +43,13 @@ def build_cloud(lyrics_input):
     mask_image = imageio.imread(os.path.join(APP_STATIC_IMG, 'mask_circle.png'))
     wordcloud = WordCloud(width=500, height=500, colormap='tab20', mask=mask_image, background_color=None, mode="RGBA")
     wordcloud = wordcloud.generate(lyrics_input)
-    filepath = os.path.join(APP_STATIC_IMG, 'cloud.png')
+    shutil.rmtree(os.path.join(APP_STATIC_IMG, 'output'), ignore_errors=True)
+    time_now = datetime.datetime.strftime(
+        datetime.datetime.now(), "%Y%m%d%H%M%S")
+    filepath = os.path.join(APP_STATIC_IMG, 'output', f'cloud_{time_now}.png')
+    os.mkdir(os.path.join(APP_STATIC_IMG, 'output'))
     wordcloud = wordcloud.to_file(filepath)
+    return f'cloud_{time_now}.png'
 
 def build_wordcloud(lyrics_input):
     wordcloud_dict = {}
@@ -77,6 +85,7 @@ def get_song_details(song_id):
     soup = BeautifulSoup(response.text, 'html.parser')
     lyrics = soup.find('div', class_='lyrics').get_text()
     lyrics = lyrics.replace('\n', ' ').replace('\r', ' ')
+    lyrics = re.sub(r'\[.*?\]', '', lyrics)
     song_dict['lyrics'] = lyrics
     # print(song_dict)
     return song_dict
@@ -90,8 +99,8 @@ def results():
             song_data_dict = get_song_details(request.form["song_id"])
             bar_data = build_wordcloud(song_data_dict["lyrics"])
             # print(bar_data)
-            build_cloud(song_data_dict["lyrics"])
-            return render_template("base.html", song_data=song_data_dict, bar_data=bar_data)
+            wordcloud_path = build_cloud(song_data_dict["lyrics"])
+            return render_template("base.html", song_data=song_data_dict, bar_data=bar_data, wordcloud_path=wordcloud_path)
     except:
         print("Unexpected error:", sys.exc_info()[0])
         return redirect(url_for("index", json_content={'Lyrics Not Found'}, message_type="Error", message_content="Lyrics Not Found"))
