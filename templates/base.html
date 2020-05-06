@@ -53,12 +53,17 @@
       <div class="row bg-white flex-nowrap">
         <!--Grid column-->
         <div class="col-md-12 p-3">
-          <h2><strong>{{pg_title}}</strong></h2>
-          <h6>{{pg_url}}</h6>
+          <img class="p-3" src="{{song_data.song_image or song_data.artist_image }}" height="150px" align="left" />
+          <h2><strong>{{song_data.title}}</strong></h2> 
+          <h6><i>{{song_data.artist}}</i></h6>
+          <h6>{{song_data.album}} , Released {{song_data.year or 'Uknown'}} </h6>
           <hr/>
-          <p>{% block page_content %}
-          {{page_content}}
-          {% endblock %}</p>
+          <p class="p-3">
+          {{song_data.lyrics}}
+          </p>
+
+          <hr />
+          <h2><strong>Analysis:</strong></h2>
          
         </div>
       </div>

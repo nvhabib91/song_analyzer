@@ -96,13 +96,16 @@
 
 
             </strong></h5>
+            <div class="ui-widget">
             <form class="form wow fadeInDown justify-content-center text-center" data-wow-delay="0.4s" name="searchSong" method="POST" action="/results">
                 <div class="md-form my-0 white-text">
                   <input class="form-control mr-sm-2 text-center white-text" type="text" placeholder="Search..." aria-label="Search" id="autocomplete" name="q">
                   <input type="hidden" name="song_url" id="songUrl" value="">
+                  <input type="hidden" name="song_id" id="songID" value="">
                 </div>
                   <button type="submit" class="btn btn-outline-white wow fadeInDown" data-wow-delay="0.4s" id="search">Go</button>
             </form>
+            </div>
           </div>
           
           <!--Grid column-->

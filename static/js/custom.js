@@ -7,7 +7,8 @@ $(function () {
                 var array = $.map(data, function (m) {
                     return {
                         label: m.TitleArtist,
-                        url: m.URL
+                        url: m.URL,
+                        songID: m.songID
                     };
                 });
                 response(array);
@@ -19,6 +20,7 @@ $(function () {
         // event.preventDefault();
         $(this).text(ui.item.label);
         $("#songUrl").attr("value",ui.item.url)
+        $("#songID").attr("value",ui.item.songID)
         // $('form[name=searchSong]').attr('action', ui.item.url);
         //window.open(ui.item.url);
         // return false;

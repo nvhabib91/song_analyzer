@@ -49,7 +49,6 @@
      background-image: url('../img/loading.gif');
      background-position: right center;
      background-repeat: no-repeat;
-     width: 80px;
  }
 
  body .ui-autocomplete {
@@ -59,13 +58,23 @@
      width: 400px !important; */
  }
 
- body .ui-autocomplete .ui-menu-item .ui-corner-all {
-     /* all <a> */
+ input {
      font-family: "Roboto", sans-serif !important;
+     color: white !important;
  }
 
+ .form-control .ui-autocomplete-input {
+     /* font-family to all */
+     font-family: "Roboto", sans-serif !important;
+     color: white !important;
+ }
+
+ body .ui-autocomplete .ui-menu-item .ui-corner-all {
+     font-family: "Roboto", sans-serif !important;
+ }
  .ui-menu-item-wrapper:hover {
-     color: #303030 !important;
-     background-color: red !important;
+     color: white !important;
+     background-image: none !important;
+     background-color: black !important;
      border: #fff 1px solid !important;
  }
