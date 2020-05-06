@@ -7,43 +7,59 @@ from bs4 import BeautifulSoup
 app = Flask(__name__)
 
 GENIUS_API_KEY = 'iPRpGvyPEPwHqexfQo75LsL0i2pPQxhkw-P5WStYbdvmUq-PQyf7ppCnT92Z-ZQc'
+genius_base_url = 'https://api.genius.com'
+headers = {'Authorization': 'Bearer ' + GENIUS_API_KEY}
 
-# class Song(object):
-#     def __init__(id, title, artist, url, album, year, image, lyrics ):
-#     self.id = id
-#     self.title = title
-#     self.
+class Song:
+    def __init__(self, id, title, artist, url, album, year, image, lyrics ):
+        self.id = id
+        self.title = title
+        self.artist = artist
+        self.url = url
+        self.album = album
+        self.year = year
+        self.image = image
+        self.lyrics = lyrics
 
-# def get_song_details(song_id):
-#     base_url = 'https://api.genius.com'
-#     genius_base_url = "http://genius.com"
-#     headers = {'Authorization': 'Bearer ' + GENIUS_API_KEY}
-#     search_url = base_url + '/search'
-#     data = {'q': query_string}
-#     response = requests.get(search_url, data=data, headers=headers)
-#     json = response.json()
-#     song_results = []
-#     for hit in json['response']['hits']:
-#         song_dict = {}
-#         song_dict['TitleArtist'] = hit['result']['full_title']
-#         song_dict['URL'] = genius_base_url+hit['result']['path']
-#         song_results.append(song_dict)
+
+def get_song_details(song_id):
+    song_dict = {}
+
+    # Get song metadata
+    search_url = genius_base_url + '/songs/' + str(song_id)
+    response = requests.get(search_url, headers=headers)
+    song = response.json()
+    song_dict['id'] = song['response']['song']['id']
+    song_dict['title'] = song['response']['song']['title']
+    song_dict['artist'] = song['response']['song']['primary_artist']['name']
+    song_dict['artist_image'] = song['response']['song']['primary_artist']['image_url']
+    song_dict['url'] = song['response']['song']['url']
+    song_dict['album'] = song['response']['song']['album']['name']
+    song_dict['year'] = song['response']['song']['release_date']
+    song_dict['song_image'] = song['response']['song']['song_art_image_thumbnail_url']
+
+    # Get song lyrics
+    response = requests.get(song['response']['song']['url'], headers=headers)
+    soup = BeautifulSoup(response.text, 'html.parser')
+    lyrics = soup.find('div', class_='lyrics').get_text()
+    lyrics = lyrics.replace('\n', ' ').replace('\r', ' ')
+    song_dict['lyrics'] = lyrics
+
+    return song_dict
+
+
+
+    
 
 
 @app.route("/results", methods=["GET", "POST"])
 def results():
     try:
-        lyrics = ""
         print(request.values)
         if request.method == "POST":
-            lyrics_url_form = request.form["song_url"]
-            song_title = request.form["q"]
-            headers = {'Authorization': 'Bearer ' + GENIUS_API_KEY}
-            response = requests.get(lyrics_url_form, headers=headers)
-            soup = BeautifulSoup(response.text, 'html.parser')
-            lyrics = soup.find('div', class_='lyrics').get_text()
-            lyrics = lyrics.replace('\n', ' ').replace('\r', ' ')
-            return render_template("base.html", pg_title=song_title, page_content=lyrics)
+            song_data_dict = get_song_details(request.form["song_id"])
+            # print(song_data_dict)
+            return render_template("base.html", song_data=song_data_dict)
     except:
         return redirect(url_for("index", json_content={'Lyrics Not Found'}, message_type="Error", message_content="Lyrics Not Found"))
 
@@ -52,18 +68,18 @@ def results():
 @app.route("/_autocomp/<search>")
 def autocomplete(search):
     query_string = search
-    base_url = 'https://api.genius.com'
-    genius_base_url = "http://genius.com"
-    headers = {'Authorization': 'Bearer ' + GENIUS_API_KEY}
-    search_url = base_url + '/search'
+    
+    search_url = genius_base_url + '/search'
     data = {'q': query_string}
     response = requests.get(search_url, data=data, headers=headers)
     json = response.json()
     song_results = []
+
     for hit in json['response']['hits']:
         song_dict = {}
         song_dict['TitleArtist'] = hit['result']['full_title']
-        song_dict['URL'] = genius_base_url+hit['result']['path']
+        song_dict['URL'] = hit['result']['url']
+        song_dict['songID'] = hit['result']['id']
         song_results.append(song_dict)
 
     return jsonify(song_results)
