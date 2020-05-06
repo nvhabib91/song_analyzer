@@ -1,5 +1,6 @@
 from wordcloud import WordCloud
 import imageio
+import sys
 import numpy as np
 import requests
 import json
@@ -42,16 +43,17 @@ class Song:
 
 
 def build_wordcloud(lyrics_input):
+    wordcloud_dict = {}
     song_lyrics = TextBlob(lyrics_input)
     lyrics = song_lyrics.word_counts.items()
-    lyrics = [lyric for lyric in lyrics]
+    lyrics = [lyric for lyric in lyrics if lyric[0] not in stops]
     sorted_lyrics = sorted(lyrics, key=itemgetter(1), reverse=True)
     top20_lyrics = sorted_lyrics[1:21]
-    df_lyrics = pd.DataFrame(top20_lyrics, columns=['Lyric', 'Count'])
-    print(df_lyrics)
-
-    # print(word_lyrics_count)
-    return ''
+    wordcloud_dict['Word'] = [a[0] for a in top20_lyrics]
+    wordcloud_dict['Count'] = [a[1] for a in top20_lyrics]
+    # df_lyrics = pd.DataFrame(top20_lyrics, columns=['Words', 'Count'])
+    print(wordcloud_dict)
+    return wordcloud_dict
 
 def get_song_details(song_id):
     song_dict = {}
@@ -75,7 +77,7 @@ def get_song_details(song_id):
     lyrics = soup.find('div', class_='lyrics').get_text()
     lyrics = lyrics.replace('\n', ' ').replace('\r', ' ')
     song_dict['lyrics'] = lyrics
-
+    # print(song_dict)
     return song_dict
 
 
@@ -89,10 +91,11 @@ def results():
         print(request.values)
         if request.method == "POST":
             song_data_dict = get_song_details(request.form["song_id"])
-            build_wordcloud(song_data_dict["lyrics"])
-            # print(song_data_dict)
-            return render_template("base.html", song_data=song_data_dict)
+            bar_data = build_wordcloud(song_data_dict["lyrics"])
+            # print(bar_data)
+            return render_template("base.html", song_data=song_data_dict, bar_data=bar_data)
     except:
+        print("Unexpected error:", sys.exc_info()[0])
         return redirect(url_for("index", json_content={'Lyrics Not Found'}, message_type="Error", message_content="Lyrics Not Found"))
 
 

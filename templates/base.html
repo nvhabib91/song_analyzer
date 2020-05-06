@@ -16,7 +16,7 @@
   <!-- Material Design Bootstrap -->
   <link href="https://cdnjs.cloudflare.com/ajax/libs/mdbootstrap/4.16.0/css/mdb.min.css" rel="stylesheet">
   <link rel="stylesheet" href="{{ url_for('static',filename='css/style.css') }}">
-
+  <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
 </head>
 
 <body style="background-image: url('https://dancingastro-wpengine.netdna-ssl.com/wp-content/uploads/2019/04/gesaffelstein-coachella-2019-julian-bajsel.jpg'); background-repeat: no-repeat; background-size: cover; background-position: center center;">
@@ -60,10 +60,35 @@
           <hr/>
           <p class="p-3">
           {{song_data.lyrics}}
+          
           </p>
 
           <hr />
           <h2><strong>Analysis:</strong></h2>
+          <hr />
+
+          <div id="bar-plot"></div>
+          
+          <script>
+              let trace = {
+                x:  {{ bar_data["Word"] | safe }},
+                y:  {{ bar_data["Count"] | safe }},
+                type: 'bar'
+              }
+
+              let chartData = [trace];
+              var config = { responsive: true }
+
+              let layout = {
+                title: "Word Count using NLP TextBlob",
+                xaxis: { title: "Words" },
+                yaxis: { title: "Frequency" }
+              }
+
+              Plotly.newPlot('bar-plot', chartData, layout, config);
+
+          </script>
+
          
         </div>
       </div>
