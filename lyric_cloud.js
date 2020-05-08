@@ -1,5 +1,3 @@
-let raw;
-
 let size = Math.min(Math.min(window.innerWidth, window.innerHeight), 600);
 let color = d3.scaleOrdinal(d3.schemeCategory20c);
 
@@ -12,11 +10,11 @@ let pack = d3.pack()
 		.size([size, size])
 		.padding(size*0.005);
 
-
 d3.text('pokerface.txt', function(error, data) {
 	if (error) throw error;
 
-	raw = data.replace(/^'|'$/g, "").split(/[^'-\w]+/);
+	let raw = data.toLowerCase()
+	raw = raw.replace(/^'-' $/g, "").split(/[^'-\w]+/);
 
 	let keys = [];
 
@@ -34,13 +32,13 @@ d3.text('pokerface.txt', function(error, data) {
 	});
 
 	keys = keys.filter(function(key) {
-	return counts[key] >= 10 ? key : '';
+	return counts[key] >= 5 ? key : '';
 	});
 
 	let root = d3.hierarchy({children: keys})
 			.sum(function(d) { return counts[d]; });
 
-	console.log(root);
+	// console.log(root);
 
 	let node = chart.selectAll(".node")
 		.data(pack(root).leaves())
@@ -62,8 +60,8 @@ d3.text('pokerface.txt', function(error, data) {
 			.attr("clip-path", function(d) { return "url(#clip-" + d.data + ")"; })
 		.append("tspan")
 			.attr("x", 0)
-			.attr("y", function(d) { return d.r/8; })
-			.attr("font-size", function(d) { return d.r/2; })
+			.attr("y", function(d) { return d.r/5; })
+			.attr("font-size", function(d) { return d.r/3; })
 			.text(function(d) { return d.data; });
 
 });
