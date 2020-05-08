@@ -66,35 +66,64 @@
           <hr />
           <h2><strong>Analysis:</strong></h2>
           <hr />
-
-          <div id="bar-plot"></div>
           
-          <script>
-              let trace = {
-                x:  {{ bar_data["Word"] | safe }},
-                y:  {{ bar_data["Count"] | safe }},
-                type: 'bar'
-              }
+          <p>
+            <div id="bar-plot"></div>
+            
+            <script>
+                let trace = {
+                  x:  {{ bar_data["Word"] | safe }},
+                  y:  {{ bar_data["Count"] | safe }},
+                  type: 'bar',
+                  text: {{ bar_data["Word"] | safe }}
+                  
+                }
 
-              let chartData = [trace];
-              var config = { responsive: true }
+                let chartData = [trace];
+                var config = { responsive: true }
 
-              let layout = {
-                title: "Word Count using NLP TextBlob",
-                xaxis: { title: "Words" },
-                yaxis: { title: "Frequency" }
-              }
+                let layout = {
+                  title: "Word Count using NLP TextBlob",
+                  xaxis: { title: "Words" },
+                  yaxis: { title: "Frequency" }
+                }
 
-              Plotly.newPlot('bar-plot', chartData, layout, config);
+                Plotly.newPlot('bar-plot', chartData, layout, config);
 
-          </script>
+            </script>
+          </p>
 
           <p class="p-3">
             <img class="p-3" src="{{ url_for('static',filename='img/output/'+wordcloud_path) }}" height="500px" align="center" />
           
           </p>
           
+
+          
+              <div id="myDiv"></div>
+              <script>
+                let labels = {{ nrc_sentiment["Sentiment"] | safe }}
+                let parents = ["", "", "", "", "", "", "", "", "", ""]
+                let data = [{
+                  type: "treemap",
+                  branchvalues: "total",
+                  labels: labels,
+                  parents: parents,
+                  values: {{ nrc_sentiment["Weight"] | safe }},
+                  textinfo: "label+value+percent",
+                  outsidetextfont: { "size": 20, "color": "#377eb8" },
+                  marker: { "line": { "width": 2 } },
+                  pathbar: { "visible": false }
+                }];
+                let layout1 = {
+                  title: "NRC Word-Emotion Association Lexicon"
+                }
+
+                Plotly.newPlot('myDiv', data, layout1)
+                </script>
+            
          
+
         </div>
       </div>
     </div>

@@ -1,43 +1,67 @@
-from wordcloud import WordCloud
 import imageio
-import sys, os
-import numpy as np
-import requests
 import json
-from flask import Flask, jsonify, render_template, request, redirect, url_for
-from flask import abort
+import nltk
+import numpy as np
+import pandas as pd
+import re
+import datetime
+import requests
+import shutil
+import sys
+import os
+
+from PIL import Image
 from bs4 import BeautifulSoup
-
-
+from flask import Flask, jsonify, render_template, request, redirect, url_for, abort
+from nltk.corpus import stopwords
+from nltk.tokenize import RegexpTokenizer
+from operator import itemgetter
+from pathlib import Path
 from textblob import TextBlob
 from textblob import Word
 from textblob.sentiments import NaiveBayesAnalyzer
-from pathlib import Path
-import nltk
-from nltk.corpus import stopwords
-from operator import itemgetter
-import pandas as pd
-import matplotlib.pyplot as plt
-import imageio
 from wordcloud import WordCloud
-from PIL import Image
-import re, datetime
-import shutil
+
 
 
 
 app = Flask(__name__)
 APP_ROOT = os.path.dirname(os.path.abspath(__file__))
 APP_STATIC_IMG = os.path.join(APP_ROOT, 'static','img')
+APP_STATIC_DATA = os.path.join(APP_ROOT, 'static','data')
 
 GENIUS_API_KEY = 'iPRpGvyPEPwHqexfQo75LsL0i2pPQxhkw-P5WStYbdvmUq-PQyf7ppCnT92Z-ZQc'
 genius_base_url = 'https://api.genius.com'
 headers = {'Authorization': 'Bearer ' + GENIUS_API_KEY}
 
-# nltk.download('stopwords')
-stops = stopwords.words('english')
+nrc_df = pd.read_csv(os.path.join(APP_STATIC_DATA, 'NRC-Emotion-Lexicon-v0.92.csv'))
 
+# Giving Credits to https://stackoverflow.com/questions/54396405/how-can-i-preprocess-nlp-text-lowercase-remove-special-characters-remove-numb
+def preprocess(lyrics_input):
+    
+    lyrics = str(lyrics_input)
+    lyrics = lyrics.lower()
+    lyrics = lyrics.replace('{html}', "")
+    cleanr = re.compile('<.*?>')
+    cleantext = re.sub(cleanr, '', lyrics)
+    rem_url = re.sub(r'http\S+', '', cleantext)
+    rem_num = re.sub('[0-9]+', '', rem_url)
+    tokenizer = RegexpTokenizer(r'\w+')
+    tokens = tokenizer.tokenize(rem_num)
+    filtered_words = [w for w in tokens if len( w) > 2 if not w in stopwords.words('english')]
+    return " ".join(filtered_words)
 
+def build_nrc_sentiment(lyrics_input):
+    tokens=RegexpTokenizer(r'\w+').tokenize(lyrics_input)
+    lyrics_df=pd.DataFrame(tokens, columns=['Word'])
+    lyrics_df=lyrics_df.merge(nrc_df, how="inner", on="Word")
+    lyrics_df=lyrics_df.drop(columns=["Word"])
+    results_df = pd.DataFrame(lyrics_df.sum(), columns=['Weight'])
+    results_df.sort_values(by=['Weight'], ascending=True, inplace=True)
+    final = {}
+    final['Sentiment'] = list(results_df.to_dict()['Weight'].keys())
+    final['Weight'] = list(results_df.to_dict()['Weight'].values())
+    return final
 
 def build_cloud(lyrics_input):
     mask_image = imageio.imread(os.path.join(APP_STATIC_IMG, 'mask_circle.png'))
@@ -51,11 +75,11 @@ def build_cloud(lyrics_input):
     wordcloud = wordcloud.to_file(filepath)
     return f'cloud_{time_now}.png'
 
-def build_wordcloud(lyrics_input):
+def build_wordcount(lyrics_input):
     wordcloud_dict = {}
     song_lyrics = TextBlob(lyrics_input)
     lyrics = song_lyrics.word_counts.items()
-    lyrics = [lyric for lyric in lyrics if lyric[0] not in stops]
+    lyrics = [lyric for lyric in lyrics]
     sorted_lyrics = sorted(lyrics, key=itemgetter(1), reverse=True)
     top20_lyrics = sorted_lyrics[1:21]
     wordcloud_dict['Word'] = [a[0] for a in top20_lyrics]
@@ -77,7 +101,7 @@ def get_song_details(song_id):
     song_dict['artist_image'] = song['response']['song']['primary_artist']['image_url']
     song_dict['url'] = song['response']['song']['url']
     song_dict['album'] = song['response']['song']['album']['name']
-    song_dict['year'] = song['response']['song']['release_date']
+    song_dict['year'] = song['response']['song']['release_date_for_display']
     song_dict['song_image'] = song['response']['song']['song_art_image_thumbnail_url']
 
     # Get song lyrics
@@ -97,10 +121,13 @@ def results():
         print(request.values)
         if request.method == "POST":
             song_data_dict = get_song_details(request.form["song_id"])
-            bar_data = build_wordcloud(song_data_dict["lyrics"])
-            # print(bar_data)
-            wordcloud_path = build_cloud(song_data_dict["lyrics"])
-            return render_template("base.html", song_data=song_data_dict, bar_data=bar_data, wordcloud_path=wordcloud_path)
+            cleaned_lyrics=preprocess(song_data_dict["lyrics"])
+            bar_data = build_wordcount(cleaned_lyrics)
+            wordcloud_path=build_cloud(cleaned_lyrics)
+            nrc_sentiment = build_nrc_sentiment(cleaned_lyrics)
+            print(bar_data)
+            print(nrc_sentiment)
+            return render_template("base.html", song_data=song_data_dict, bar_data=bar_data, wordcloud_path=wordcloud_path, nrc_sentiment=nrc_sentiment)
     except:
         print("Unexpected error:", sys.exc_info()[0])
         return redirect(url_for("index", json_content={'Lyrics Not Found'}, message_type="Error", message_content="Lyrics Not Found"))
