@@ -21,7 +21,7 @@ from textblob import TextBlob
 from textblob import Word
 from textblob.sentiments import NaiveBayesAnalyzer
 from wordcloud import WordCloud
-
+from explicit_words import explicit
 
 
 
@@ -34,6 +34,10 @@ GENIUS_API_KEY = 'iPRpGvyPEPwHqexfQo75LsL0i2pPQxhkw-P5WStYbdvmUq-PQyf7ppCnT92Z-Z
 genius_base_url = 'https://api.genius.com'
 headers = {'Authorization': 'Bearer ' + GENIUS_API_KEY}
 
+filter_words = stopwords.words('english')
+filter_words = filter_words + explicit #from explicit_words.py
+print(type(filter_words))
+print(filter_words)
 nrc_df = pd.read_csv(os.path.join(APP_STATIC_DATA, 'NRC-Emotion-Lexicon-v0.92.csv'))
 
 # Giving Credits to https://stackoverflow.com/questions/54396405/how-can-i-preprocess-nlp-text-lowercase-remove-special-characters-remove-numb
@@ -48,7 +52,7 @@ def preprocess(lyrics_input):
     rem_num = re.sub('[0-9]+', '', rem_url)
     tokenizer = RegexpTokenizer(r'\w+')
     tokens = tokenizer.tokenize(rem_num)
-    filtered_words = [w for w in tokens if len( w) > 2 if not w in stopwords.words('english')]
+    filtered_words = [w for w in tokens if len( w) > 2 if not w in filter_words]
     return " ".join(filtered_words)
 
 def build_nrc_sentiment(lyrics_input):

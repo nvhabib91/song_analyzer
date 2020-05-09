@@ -33,3 +33,11 @@ $(function () {
     });
 });
 
+$(document).ready(function () {
+    $(".progress").hide();
+});
+
+$("#search").click(function () {
+    $(".progress").show();
+});
+
