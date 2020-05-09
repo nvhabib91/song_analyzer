@@ -7,7 +7,7 @@ $(function () {
                 var array = $.map(data, function (m) {
                     return {
                         label: m.TitleArtist,
-                        url: m.URL,
+                        search: m.search,
                         songID: m.songID
                     };
                 });
@@ -19,7 +19,7 @@ $(function () {
         console.log("Select item",ui);
         // event.preventDefault();
         $(this).text(ui.item.label);
-        $("#songUrl").attr("value",ui.item.url)
+        $("#songSearch").attr("value", ui.item.search)
         $("#songID").attr("value",ui.item.songID)
         // $('form[name=searchSong]').attr('action', ui.item.url);
         //window.open(ui.item.url);
