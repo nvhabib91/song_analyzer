@@ -52,19 +52,25 @@
            <!--Grid row-->
       <div class="row bg-white flex-nowrap">
         <!--Grid column-->
-        <div class="col-md-12 p-3">
-          <img class="p-3" src="{{song_data.song_image or song_data.artist_image }}" height="150px" align="left" />
+        <div class="col-md-12 py-3 px-5">
+          <img class="p-3 img-responsive" src="{{song_data.song_image or song_data.artist_image }}" height="150px" align="right" />
           <h2><strong>{{song_data.title}}</strong></h2> 
           <h6><i>{{song_data.artist}}</i></h6>
           <h6>{{song_data.album}} , Released {{song_data.year or 'Uknown'}} </h6>
+          <iframe src="https://open.spotify.com/embed/track/{{song_data.spotify_id}}" width="300" height="80" frameborder="0"
+            allowtransparency="true" allow="encrypted-media"></iframe>
           <hr/>
-          <p class="p-3">
+          
+          <h4><strong>Lyrics</strong></h4><br/>
+          <p class="p-2">
           {{song_data.lyrics}}
           
           </p>
 
+          
+
           <hr />
-          <h2><strong>Analysis:</strong></h2>
+          <h4><strong>Analyses</strong></h4>
           <hr />
           
           <p>
@@ -93,10 +99,11 @@
             </script>
           </p>
 
-          <p class="p-3">
-            <img class="p-3" src="{{ url_for('static',filename='img/output/'+wordcloud_path) }}" height="500px" align="center" />
+          <div class="p-3 text-center">
+            <h5><strong>WordCloud using NLP TextBlob</strong></h5>
+            <img src="{{ url_for('static',filename='img/output/'+wordcloud_path) }}" height="500px" align="center" />
           
-          </p>
+          </div>
           
 
           

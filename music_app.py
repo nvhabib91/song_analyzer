@@ -103,6 +103,9 @@ def get_song_details(song_id):
     song_dict['album'] = song['response']['song']['album']['name']
     song_dict['year'] = song['response']['song']['release_date_for_display']
     song_dict['song_image'] = song['response']['song']['song_art_image_thumbnail_url']
+    spotify_uri = [a['native_uri'] for a in song['response']['song']['media'] if a['provider'] == 'spotify']
+    song_dict['spotify_uri'] = spotify_uri[0] if len(spotify_uri) >= 1 else 'UNKNOWN'
+    song_dict['spotify_id'] = spotify_uri[0].replace('spotify:track:', '') if len(spotify_uri) >= 1 else 'UNKNOWN'
 
     # Get song lyrics
     response = requests.get(song['response']['song']['url'], headers=headers)
