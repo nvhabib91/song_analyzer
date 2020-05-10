@@ -17,6 +17,8 @@
   <link href="https://cdnjs.cloudflare.com/ajax/libs/mdbootstrap/4.16.0/css/mdb.min.css" rel="stylesheet">
   <link rel="stylesheet" href="{{ url_for('static',filename='css/style.css') }}">
   <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+  <link href="{{ url_for('static',filename='vendor/fontawesome-free/css/all.css') }}" rel="stylesheet"
+    type="text/css">
 </head>
 
 <body style="background-image: url('https://dancingastro-wpengine.netdna-ssl.com/wp-content/uploads/2019/04/gesaffelstein-coachella-2019-julian-bajsel.jpg'); background-repeat: no-repeat; background-size: cover; background-position: center center;">
@@ -25,7 +27,9 @@
     <!--Navbar-->
     <nav class="navbar navbar-expand-lg navbar-dark fixed-top scrolling-navbar">
       <div class="container">
-        <a class="navbar-brand" href="/"><strong>Song AI</strong></a>
+        <a class="navbar-brand" href="/">
+          <i class="fas fa-music px-2"></i>
+          <strong> Song AI</strong></a>
         <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent-7"
           aria-controls="navbarSupportedContent-7" aria-expanded="false" aria-label="Toggle navigation">
           <span class="navbar-toggler-icon"></span>
@@ -50,29 +54,59 @@
 
   <div class="container pt-5">
            <!--Grid row-->
-      <div class="row bg-white flex-nowrap">
+      <div class="row flex-nowrap bg-dark justify-content-center">
+        <div class="col-md-12 p-0">
+          <header class="jumbotron text-white bg-transparent py-4 align-items-center">
+            <img class="pb-3 img-responsive" src="{{song_data.song_image or song_data.artist_image }}" height="250px"
+              align="right" />
+            <h2><strong>{{song_data.title}}</strong></h2>
+            <h6><i>{{song_data.artist}}</i></h6>
+            <h6>{{song_data.album}} , Released {{song_data.year or 'Uknown'}} </h6>
+            <br/>
+            <iframe src="https://open.spotify.com/embed/track/{{song_data.spotify_id}}" width="300" height="80" frameborder="0"
+              allowtransparency="true" allow="encrypted-media"></iframe>
+          </header>
+        </div>
+
+      </div>
+
+
+
+      <div class="row bg-white flex-nowrap justify-content-center">
         <!--Grid column-->
         <div class="col-md-12 py-3 px-5">
-          <img class="p-3 img-responsive" src="{{song_data.song_image or song_data.artist_image }}" height="150px" align="right" />
-          <h2><strong>{{song_data.title}}</strong></h2> 
-          <h6><i>{{song_data.artist}}</i></h6>
-          <h6>{{song_data.album}} , Released {{song_data.year or 'Uknown'}} </h6>
-          <iframe src="https://open.spotify.com/embed/track/{{song_data.spotify_id}}" width="300" height="80" frameborder="0"
-            allowtransparency="true" allow="encrypted-media"></iframe>
-          <hr/>
+
           
-          <h4><strong>Lyrics</strong></h4><br/>
+          
+          
+
+          <div class="py-3 text-center text-uppercase text-dark mb-1">
+            <h2>Lyrics</h2>
+            <div class="divider-custom-icon">
+              <i class="fas fa-music"></i>
+              <i class="fas fa-music"></i>
+              <i class="fas fa-music"></i>
+            </div>
+          </div>
+
+
           <p class="p-2">
-          {{song_data.lyrics}}
-          
+            {{song_data.lyrics}}
           </p>
 
-          
+          <hr class="star-dark mb-3">
+          <i class="fas fa-horizontal-rule"></i>
 
-          <hr />
-          <h4><strong>Analyses</strong></h4>
-          <hr />
           
+          <div class="py-3 text-center text-uppercase text-dark mb-1">
+            <h2>Analyses</h2>
+            <div class="divider-custom-icon">
+              <i class="fas fa-music"></i>
+              <i class="fas fa-music"></i>
+              <i class="fas fa-music"></i>
+            </div>
+          </div>
+
           <p>
             <div id="bar-plot"></div>
             
@@ -106,7 +140,7 @@
           </div>
           
 
-          
+          <p>
               <div id="myDiv"></div>
               <script>
                 let labels = {{ nrc_sentiment["Sentiment"] | safe }}
@@ -128,7 +162,7 @@
 
                 Plotly.newPlot('myDiv', data, layout1)
                 </script>
-            
+            </p>
          
 
         </div>

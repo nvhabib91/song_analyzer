@@ -72,9 +72,40 @@
  body .ui-autocomplete .ui-menu-item .ui-corner-all {
      font-family: "Roboto", sans-serif !important;
  }
+
  .ui-menu-item-wrapper:hover {
      color: white !important;
      background-image: none !important;
      background-color: black !important;
      border: #fff 1px solid !important;
+ }
+
+ .jumbotron {
+     background: #000000 !important;
+     border-bottom: 1px solid #2b2828 !important;
+     background-color: #0e0e0e !important;
+     background-repeat: repeat-x !important;
+     background-image: -moz-linear-gradient(-40deg, #1b1b1b, #0a0a0a) !important;
+     background-image: -webkit-linear-gradient(-40deg, #1b1b1b, #0a0a0a) !important;
+     background-image: -o-linear-gradient(-40deg, #1b1b1b, #0a0a0a) !important;
+     background-image: linear-gradient(-40deg, #1b1b1b, #0a0a0a) !important;
+     text-shadow: 2px 2px 2px rgb(180, 180, 180) !important;
+ }
+
+ .jumbotron, .jumbotron h1 {
+     color: #fff !important;
+ }
+
+ .jumbotron h1 {
+     font-size: 80px !important;
+     letter-spacing: -2px !important;
+     line-height: 1
+ }
+
+ .jumbotron p {
+     margin-top: 15px !important;
+     margin-bottom: 15px !important;
+     font-size: 30px !important;
+     line-height: 1.3 !important;
+     font-weight: lighter
  }
