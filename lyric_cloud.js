@@ -1,5 +1,5 @@
 let size = Math.min(Math.min(window.innerWidth, window.innerHeight), 600);
-let color = d3.scaleOrdinal(d3.schemeCategory20c);
+let color = d3.scaleOrdinal(d3.schemeCategory10);
 
 let chart = d3.select("body")
 	.append('svg')
