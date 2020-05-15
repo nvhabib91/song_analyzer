@@ -2,6 +2,7 @@
 
  html, body, header, .view {
      height: 100%;
+     background-attachment: fixed !important;
  }
 
  @media (max-width: 740px) {
