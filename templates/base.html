@@ -107,8 +107,21 @@
             </div>
           </div>
 
-          <p>
-            <div id="bar-plot"></div>
+          <br />
+            
+
+            <div class="card text-center">
+              <div class="card-header text-white bg-dark">
+                Word Count using NLP TextBlob
+              </div>
+              <div class="card-body">
+                <p class="card-text">
+                    <div id="bar-plot"></div>
+                </p>
+              </div>
+            </div>
+
+            <br />
             
             <script>
                 let trace = {
@@ -123,7 +136,6 @@
                 var config = { responsive: true }
 
                 let layout = {
-                  title: "Word Count using NLP TextBlob",
                   xaxis: { title: "Words" },
                   yaxis: { title: "Frequency" }
                 }
@@ -131,17 +143,34 @@
                 Plotly.newPlot('bar-plot', chartData, layout, config);
 
             </script>
-          </p>
 
-          <div class="p-3 text-center">
-            <h5><strong>WordCloud using NLP TextBlob</strong></h5>
-            <img src="{{ url_for('static',filename='img/output/'+wordcloud_path) }}" height="500px" align="center" />
-          
+          <br />
+
+          <div class="card text-center">
+            <div class="card-header text-white bg-dark">
+              WordCloud using NLP TextBlob
+            </div>
+            <div class="card-body">
+              <p class="card-text">
+                <img class="img-fluid p-3" src="{{ url_for('static',filename='img/output/'+wordcloud_path) }}" height="500px" align="center" />
+                </p>
+            </div>
+          </div>
+
+          <br />
+
+          <div class="card text-center">
+            <div class="card-header text-white bg-dark">
+              NRC Word-Emotion Association Lexicon
+            </div>
+            <div class="card-body">
+              <p class="card-text">
+                <div id="treemap"></div>
+              </p>
+            </div>
+            
           </div>
           
-
-          <p>
-              <div id="myDiv"></div>
               <script>
                 let labels = {{ nrc_sentiment["Sentiment"] | safe }}
                 let parents = ["", "", "", "", "", "", "", "", "", ""]
@@ -156,14 +185,71 @@
                   marker: { "line": { "width": 2 } },
                   pathbar: { "visible": false }
                 }];
-                let layout1 = {
-                  title: "NRC Word-Emotion Association Lexicon"
-                }
-
-                Plotly.newPlot('myDiv', data, layout1)
+                Plotly.newPlot('treemap', data, config)
                 </script>
-            </p>
-         
+            
+              <br />
+                <div class="card text-center">
+                  <div class="card-header text-white bg-dark">
+                    Vader Sentiment Analysis
+                  </div>
+                  <div class="card-body">
+                    <p class="card-text">
+                    <div id="vader-plot"></div>
+                    </p>
+                  </div>
+                  <div class="card-footer text-muted text-left">
+                    <b>Words that can affect the sentiment scores:</b> {{ vader_sentiment["affinity_words"] | safe }} <br />
+                    <b>Compound Score:</b> {{ vader_sentiment["compound_score"] | safe }} , <i>Vader value that ranges from -1 as being negative, +1 as positive</i>
+                  </div>
+                </div>
+
+                <script>
+                  var trace2 = {
+                    labels: {{ vader_sentiment["Sentiment"] | safe }},
+                    values: {{ vader_sentiment["Weight"] | safe }},
+                    type: 'pie'
+                  };
+
+                  let data2 = [trace2];
+
+
+                  Plotly.newPlot("vader-plot", data2, config );
+                </script>
+
+
+                <br />
+                <div class="card text-center">
+                  <div class="card-header text-white bg-dark">
+                   Song Tags
+                  </div>
+                  <div class="card-body">
+                    <p class="card-text">
+                    {{song_tags}}
+                    </p>
+                  </div>
+                  <div class="card-footer text-muted text-left">
+                    Song tags fetched from LastFM
+                  </div>
+                </div>
+
+
+                <br />
+                <div class="card text-center">
+                  <div class="card-header text-white bg-dark">
+                    Vader Sentiment Analysis
+                  </div>
+                  <div class="card-body">
+                    <p class="card-text">
+                    Predicted Genre:
+                    </p>
+                  </div>
+                  <div class="card-footer text-muted text-left">
+                    30% Accuracy
+                  </div>
+                </div>
+
+              
 
         </div>
       </div>

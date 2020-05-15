@@ -89,7 +89,7 @@
      background-image: -webkit-linear-gradient(-40deg, #1b1b1b, #0a0a0a) !important;
      background-image: -o-linear-gradient(-40deg, #1b1b1b, #0a0a0a) !important;
      background-image: linear-gradient(-40deg, #1b1b1b, #0a0a0a) !important;
-     text-shadow: 2px 2px 2px rgb(180, 180, 180) !important;
+     text-shadow: 1px 1px 1px rgb(94, 94, 94) !important;
  }
 
  .jumbotron, .jumbotron h1 {
@@ -108,4 +108,10 @@
      font-size: 30px !important;
      line-height: 1.3 !important;
      font-weight: lighter
+ }
+
+ @media (max-width: 750px) {
+     #wordcloud {
+         height: 200px;
+     }
  }

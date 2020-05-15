@@ -25,7 +25,18 @@ from textblob.sentiments import NaiveBayesAnalyzer
 from wordcloud import WordCloud
 from explicit_words import explicit
 from app_credentials import *
+from vaderSentiment.vaderSentiment import SentimentIntensityAnalyzer
+from nltk import word_tokenize
+from nltk.stem import WordNetLemmatizer
+from afinn import Afinn
 
+# Tensorflow Keras Dependencies
+import keras
+from keras.preprocessing import image
+from keras.preprocessing.image import img_to_array
+from keras.applications.xception import (
+    Xception, preprocess_input, decode_predictions)
+from keras import backend as K
 
 app = Flask(__name__)
 
@@ -49,6 +60,11 @@ FILTER_WORDS = STOPS + explicit  # from explicit_words.py
 NRC_LEXICON_SENTIMENT = pd.read_csv(os.path.join(
     APP_STATIC_DATA, 'NRC-Emotion-Lexicon-v0.92.csv'))
 
+AFINNITY_SRC_DF = pd.read_csv(
+    os.path.join(
+        APP_STATIC_DATA, 'AFINN-111.txt'), names=["word", "score"], sep='\t')
+
+AFINNITY_LIST = AFINNITY_SRC_DF['word'].values.tolist()
 
 def get_spotify_track_id(search_string):
     try:
@@ -115,10 +131,58 @@ def build_wordcount(lyrics_input):
     # print(wordcloud_dict)
     return wordcloud_dict
 
+def get_tags_for_song(song_name, artist_name):
+    API_KEY = "a6627484c312d94e547aeac4f28b739d"
+
+    artist = artist_name
+    artist = artist.replace(' ',"+")
+    artist = artist.replace("''","")
+    artist
+    song = song_name
+    song = song.replace(' ',"+")
+    song = song.replace(",","")
+    song
+
+    try:
+        query_url = f"http://ws.audioscrobbler.com/2.0/?method=track.getInfo&api_key={API_KEY}&artist={artist}&track={song}&format=json"
+        response = requests.get(query_url)
+        tags = response.json()['track']['toptags']['tag']
+        tag = []
+        for i in range(len(tags)):
+            if tags[i]['name'] == artist.lower():
+                continue
+            else:
+                tag.append(tags[i]['name'])
+        if len(tag) == 0:
+            return "Not Enough Data On This Songs"
+        else:
+            return tag
+    except:
+        return "Something Went Wrong"
+
+def build_vader(lyrics_input):
+    analyzer = SentimentIntensityAnalyzer()
+    text_sentiment = analyzer.polarity_scores(lyrics_input)
+
+    #Split the dictionary for graphing
+    compound_score = text_sentiment.pop('compound')
+    
+    lemmatized_tokens = nltk.word_tokenize(lyrics_input)
+
+    common = list(set(AFINNITY_LIST) & set(lemmatized_tokens))
+    common_string = ', '.join([str(x) for x in common])
+    text_sentiment1 = {}
+    text_sentiment1['Sentiment'] = ["Negative", "Neutral", "Positive"]
+    text_sentiment1['Weight'] = list(text_sentiment.values())
+    text_sentiment1['affinity_words'] = common_string
+    text_sentiment1['compound_score'] = compound_score
+
+    return text_sentiment1
+
+
 
 def get_song_details(song_id, song_search):
     song_dict = {}
-
     # Get song metadata
     search_url = GENIUS_BASE_URL + '/songs/' + str(song_id)
     response = requests.get(search_url, headers=GENIUS_HEADERS)
@@ -156,14 +220,22 @@ def results():
         print(request.values)
         if request.method == "POST":
             search_string = request.form["song_search"]
+            print("Getting song details...")
             song_data_dict = get_song_details(request.form["song_id"], search_string)
-            
             print(search_string)
             cleaned_lyrics = preprocess(song_data_dict["lyrics"])
+            print("Processing wordcount...")
             bar_data = build_wordcount(cleaned_lyrics)
+            print("Processing wordcloud...")
             wordcloud_path = build_cloud(cleaned_lyrics)
+            print("Processing NRC Sentiment...")
             nrc_sentiment = build_nrc_sentiment(cleaned_lyrics)
-            return render_template("base.html", song_data=song_data_dict, bar_data=bar_data, wordcloud_path=wordcloud_path, nrc_sentiment=nrc_sentiment)
+            print("Processing Vader Sentiment...")
+            vader_sentiment = build_vader(cleaned_lyrics)
+            print("Getting Song Tags...")
+            song_tags = get_tags_for_song(song_data_dict["title"], song_data_dict["artist"])
+            print("Returning results")
+            return render_template("base.html", song_data=song_data_dict, bar_data=bar_data, wordcloud_path=wordcloud_path, nrc_sentiment=nrc_sentiment, vader_sentiment=vader_sentiment, song_tags=song_tags)
     except:
         print("Unexpected error:", sys.exc_info()[0])
         return redirect(url_for("index", json_content={'Lyrics Not Found'}, message_type="Error", message_content="Lyrics Not Found"))
