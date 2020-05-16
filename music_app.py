@@ -107,8 +107,6 @@ def get_image_predictions(url_string):
         for (imagenetID, label, prob) in results[0]:
             row = {"label": label, "probability": float(prob)}
             data.append(row)
-        # data['label'] = labels
-        # data['probs'] = probs
         return data
 
 # Giving Credits to https://stackoverflow.com/questions/54396405/how-can-i-preprocess-nlp-text-lowercase-remove-special-characters-remove-numb
@@ -138,6 +136,13 @@ def build_nrc_sentiment(lyrics_input):
     final['Weight'] = list(results_df.to_dict()['Weight'].values())
     return final
 
+def get_genre(id):
+    try:
+        track = SPOTIFY.track(id)
+        artist = SPOTIFY.artist(track['artists'][0]['id'])
+        return artist['genres']
+    except:
+        return "Unknown"
 
 def build_cloud(lyrics_input):
     mask_image = imageio.imread(os.path.join(
@@ -264,11 +269,11 @@ def results():
             print("Getting Song Tags...")
             song_tags = get_tags_for_song(song_data_dict["title"], song_data_dict["artist"])
             print("Getting Image Predictions...")
-            print(song_data_dict["song_image"])
             image_predictions = get_image_predictions(song_data_dict["song_image"])
-            print(image_predictions)
+            print("Getting Genre...")
+            artist_genre = get_genre(song_data_dict["spotify_id"])
             print("Returning results")
-            return render_template("base.html", song_data=song_data_dict, bar_data=bar_data, wordcloud_path=wordcloud_path, nrc_sentiment=nrc_sentiment, vader_sentiment=vader_sentiment, song_tags=song_tags, image_predictions=image_predictions)
+            return render_template("base.html", song_data=song_data_dict, bar_data=bar_data, wordcloud_path=wordcloud_path, nrc_sentiment=nrc_sentiment, vader_sentiment=vader_sentiment, song_tags=song_tags, image_predictions=image_predictions, artist_genre=artist_genre)
     except:
         print("Unexpected error:", sys.exc_info()[0])
         return redirect(url_for("index", json_content={'Lyrics Not Found'}, message_type="Error", message_content="Lyrics Not Found"))
