@@ -57,7 +57,7 @@
       <div class="row flex-nowrap bg-dark justify-content-center">
         <div class="col-md-12 p-0">
           <header class="jumbotron text-white bg-transparent py-4 align-items-center">
-            <img class="pb-3 img-responsive" src="{{song_data.song_image or song_data.artist_image }}" height="250px"
+            <img class="pb-3 img-fluid" src="{{song_data.song_image or song_data.artist_image }}" height="250px"
               align="right" />
             <h2><strong>{{song_data.title}}</strong></h2>
             <h6><i>{{song_data.artist}}</i></h6>
@@ -161,7 +161,7 @@
 
           <div class="card text-center">
             <div class="card-header text-white bg-dark">
-              NRC Word-Emotion Association Lexicon
+              NRC Word-Emotion Association Lexicon Scores
             </div>
             <div class="card-body">
               <p class="card-text">
@@ -185,7 +185,8 @@
                   marker: { "line": { "width": 2 } },
                   pathbar: { "visible": false }
                 }];
-                Plotly.newPlot('treemap', data, config)
+                let layout1 = {}
+                Plotly.newPlot('treemap', data, layout1 , config)
                 </script>
             
               <br />
@@ -214,7 +215,7 @@
                   let data2 = [trace2];
 
 
-                  Plotly.newPlot("vader-plot", data2, config );
+                  Plotly.newPlot("vader-plot", data2, layout1, config );
                 </script>
 
 
@@ -237,11 +238,11 @@
                 <br />
                 <div class="card text-center">
                   <div class="card-header text-white bg-dark">
-                    Vader Sentiment Analysis
+                    Music Genre Prediction using KNeighborsClassifier
                   </div>
                   <div class="card-body">
                     <p class="card-text">
-                    Predicted Genre:
+                    Predicted Genre: {{artist_genre}}
                     </p>
                   </div>
                   <div class="card-footer text-muted text-left">
@@ -249,6 +250,38 @@
                   </div>
                 </div>
 
+                <br />
+                <div class="card text-center">
+                  <div class="card-header text-white bg-dark">
+                    Song Image Analysis using Keras Xception
+                  </div>
+                  <div class="card-body">
+                    <p class="card-text">
+                      <img class="pb-3 img-fluid" src="{{song_data.song_image or song_data.artist_image }}" height="250px" align="center" />
+                    </p>
+                  </div>
+                  <div class="card-footer text-center">
+                    <table class="table px-3 table-hover table-striped table-sm table-dark">
+                      <thead>
+                        <tr>
+                          <th scope="col">Predicted Label</th>
+                          <th scope="col">Probability</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {% for dict_item in image_predictions %}
+                        <tr>
+                          {% for key, value in dict_item.items() %}
+                            <td>{{value}}</td>
+                            {% endfor %}
+                          </tr>
+                        {% endfor %}
+                      </tbody>
+                    </table>
+                    
+
+                  </div>
+                </div>
               
 
         </div>

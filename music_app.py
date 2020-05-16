@@ -31,12 +31,14 @@ from nltk.stem import WordNetLemmatizer
 from afinn import Afinn
 
 # Tensorflow Keras Dependencies
-import keras
-from keras.preprocessing import image
-from keras.preprocessing.image import img_to_array
-from keras.applications.xception import (
+import tensorflow as tf
+from tensorflow.keras.preprocessing import image
+from tensorflow.keras.preprocessing.image import img_to_array
+from tensorflow.keras.applications.xception import (
     Xception, preprocess_input, decode_predictions)
-from keras import backend as K
+from tensorflow.keras import backend as K
+from io import BytesIO
+from PIL import Image
 
 app = Flask(__name__)
 
@@ -66,6 +68,13 @@ AFINNITY_SRC_DF = pd.read_csv(
 
 AFINNITY_LIST = AFINNITY_SRC_DF['word'].values.tolist()
 
+
+global model
+global graph
+model = Xception(weights='imagenet')
+graph = tf.compat.v1.Session()
+
+
 def get_spotify_track_id(search_string):
     try:
         result = SPOTIFY.search(search_string, limit=1, type='track')
@@ -74,6 +83,31 @@ def get_spotify_track_id(search_string):
     except:
         return "UNKNOWN"
 
+def prepare_image(img):
+    img = image.img_to_array(img)
+    img = np.expand_dims(img, axis=0)
+    img = preprocess_input(img)
+    return img
+
+def get_image_predictions(url_string):
+    url = str(url_string)
+    data = []
+    image_size = (299, 299)
+    response = requests.get(url)
+    img = Image.open(BytesIO(response.content))
+    img = img.convert('RGB')
+    img = img.resize(image_size, Image.NEAREST)
+    image = prepare_image(img)
+
+    # make predictions
+    global graph
+    with graph.as_default():
+        preds = model.predict(image)
+        results = decode_predictions(preds)
+        for (imagenetID, label, prob) in results[0]:
+            row = {"label": label, "probability": float(prob)}
+            data.append(row)
+        return data
 
 # Giving Credits to https://stackoverflow.com/questions/54396405/how-can-i-preprocess-nlp-text-lowercase-remove-special-characters-remove-numb
 def preprocess(lyrics_input):
@@ -102,6 +136,13 @@ def build_nrc_sentiment(lyrics_input):
     final['Weight'] = list(results_df.to_dict()['Weight'].values())
     return final
 
+def get_genre(id):
+    try:
+        track = SPOTIFY.track(id)
+        artist = SPOTIFY.artist(track['artists'][0]['id'])
+        return artist['genres']
+    except:
+        return "Unknown"
 
 def build_cloud(lyrics_input):
     mask_image = imageio.imread(os.path.join(
@@ -133,16 +174,12 @@ def build_wordcount(lyrics_input):
 
 def get_tags_for_song(song_name, artist_name):
     API_KEY = "a6627484c312d94e547aeac4f28b739d"
-
     artist = artist_name
     artist = artist.replace(' ',"+")
     artist = artist.replace("''","")
-    artist
     song = song_name
     song = song.replace(' ',"+")
     song = song.replace(",","")
-    song
-
     try:
         query_url = f"http://ws.audioscrobbler.com/2.0/?method=track.getInfo&api_key={API_KEY}&artist={artist}&track={song}&format=json"
         response = requests.get(query_url)
@@ -163,12 +200,9 @@ def get_tags_for_song(song_name, artist_name):
 def build_vader(lyrics_input):
     analyzer = SentimentIntensityAnalyzer()
     text_sentiment = analyzer.polarity_scores(lyrics_input)
-
     #Split the dictionary for graphing
     compound_score = text_sentiment.pop('compound')
-    
     lemmatized_tokens = nltk.word_tokenize(lyrics_input)
-
     common = list(set(AFINNITY_LIST) & set(lemmatized_tokens))
     common_string = ', '.join([str(x) for x in common])
     text_sentiment1 = {}
@@ -234,8 +268,12 @@ def results():
             vader_sentiment = build_vader(cleaned_lyrics)
             print("Getting Song Tags...")
             song_tags = get_tags_for_song(song_data_dict["title"], song_data_dict["artist"])
+            print("Getting Image Predictions...")
+            image_predictions = get_image_predictions(song_data_dict["song_image"])
+            print("Getting Genre...")
+            artist_genre = get_genre(song_data_dict["spotify_id"])
             print("Returning results")
-            return render_template("base.html", song_data=song_data_dict, bar_data=bar_data, wordcloud_path=wordcloud_path, nrc_sentiment=nrc_sentiment, vader_sentiment=vader_sentiment, song_tags=song_tags)
+            return render_template("base.html", song_data=song_data_dict, bar_data=bar_data, wordcloud_path=wordcloud_path, nrc_sentiment=nrc_sentiment, vader_sentiment=vader_sentiment, song_tags=song_tags, image_predictions=image_predictions, artist_genre=artist_genre)
     except:
         print("Unexpected error:", sys.exc_info()[0])
         return redirect(url_for("index", json_content={'Lyrics Not Found'}, message_type="Error", message_content="Lyrics Not Found"))
